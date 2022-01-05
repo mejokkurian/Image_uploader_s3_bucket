@@ -1,32 +1,37 @@
 from user.models import User
 from .serializers import UserReg_Serialzer,LoginSerializer,UserCostomize,DropBoxSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate,login
 from rest_framework.response import Response
 from rest_framework import status, viewsets,parsers
 from rest_framework.views import APIView
-from rest_framework import generics
 from rest_framework import mixins 
 from .models import DropBox
 
 
-
-
 # Create your views here.
 
-# user creation view 
-class UserRegistration(generics.GenericAPIView,mixins.CreateModelMixin):
-    queryset = User.objects.all()
-    serializer_class = UserReg_Serialzer
-    
+class UserRegistration(APIView):
     def post(self, request):
-        return self.create(request)
-
+        try:
+            name = request.data.get('name')
+            password = request.data.get('password')
+            mobile_number = request.data.get('mobile_number')
+            email = request.data.get('email')
+            user = User.objects.create_user(name=name,password=password,mobile_number=mobile_number,email=email)
+            user.save()
+            message = {"msg" : "User created successfully.","email":email}
+            return Response(message,status=status.HTTP_201_CREATED)
+        except:
+            message = {"error" : "clients side error or user details already in use"}
+            return Response(message,status=status.HTTP_400_BAD_REQUEST)
+        
 
 #------------- user login view ----------------- #    
-class UserLogin(APIView):
+class UserLogin(APIView): 
     def post(self, request):
         try:
             email = request.data.get('email')
@@ -68,8 +73,12 @@ class Users(viewsets.GenericViewSet,mixins.RetrieveModelMixin,
     
 
 class DropBoxViewset(viewsets.ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = DropBox.objects.all()
     serializer_class = DropBoxSerializer
     parser_classes = [parsers.MultiPartParser, parsers.FormParser]
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    
+    
+
+
 

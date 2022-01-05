@@ -8,6 +8,7 @@ router = routers.SimpleRouter()
 router.register('usercustomize', views.Users, basename='Users')
 router.register('upload', views.DropBoxViewset,basename="upload")
 
+
 urlpatterns = [
     path('api/',include(router.urls)),
     path('UserRegistration',views.UserRegistration.as_view(),name='UserRegistration'),
